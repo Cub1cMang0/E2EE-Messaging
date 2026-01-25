@@ -1,48 +1,52 @@
-import sys
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                               QHBoxLayout, QTextEdit, QLineEdit, QPushButton,
-                               QSizePolicy)
-from PySide6.QtGui import QAction
+# -*- coding: utf-8 -*-
 
-class FullScreenMessenger(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Desktop Messenger")
-        screen_geometry = QApplication.primaryScreen().availableGeometry()
-        self.resize(int(screen_geometry.width() * 0.7), int(screen_geometry.height() * 0.7))
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        self.main_layout = QVBoxLayout(central_widget)
-        self.chat_history = QTextEdit()
-        self.chat_history.setReadOnly(True)
-        self.chat_history.setStyleSheet("font-size: 16px;") 
-        self.chat_history.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.main_layout.addWidget(self.chat_history)
-        self.input_layout = QHBoxLayout()
-        self.message_input = QLineEdit()
-        self.message_input.setPlaceholderText("Type your message here...")
-        self.message_input.setStyleSheet("font-size: 14px; padding: 5px;")
-        self.message_input.returnPressed.connect(self.send_message)
-        self.input_layout.addWidget(self.message_input)
-        self.send_button = QPushButton("Send")
-        self.send_button.setStyleSheet("font-size: 14px; padding: 5px;")
-        self.send_button.clicked.connect(self.send_message)
-        self.input_layout.addWidget(self.send_button)
-        self.main_layout.addLayout(self.input_layout)
+################################################################################
+## Form generated from reading UI file 'app_gui.ui'
+##
+## Created by: Qt User Interface Compiler version 6.10.1
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QDialog, QPushButton, QSizePolicy,
+    QTextEdit, QWidget)
 
-    def send_message(self):
-        user_text = self.message_input.text().strip()
-        if user_text:
-            self.chat_history.append(f"<b>You:</b> {user_text}")
-            self.message_input.clear()
-            self.receive_message(f"Echo: {user_text}")
+class Ui_main_window(object):
+    def setupUi(self, main_window):
+        if not main_window.objectName():
+            main_window.setObjectName(u"main_window")
+        main_window.resize(1133, 875)
+        self.message_log = QTextEdit(main_window)
+        self.message_log.setObjectName(u"message_log")
+        self.message_log.setGeometry(QRect(39, 9, 1081, 781))
+        self.send_button = QPushButton(main_window)
+        self.send_button.setObjectName(u"send_button")
+        self.send_button.setGeometry(QRect(1040, 810, 80, 51))
+        self.texting_box = QTextEdit(main_window)
+        self.texting_box.setObjectName(u"texting_box")
+        self.texting_box.setGeometry(QRect(40, 810, 991, 51))
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.texting_box.sizePolicy().hasHeightForWidth())
+        self.texting_box.setSizePolicy(sizePolicy)
+        self.texting_box.setMinimumSize(QSize(0, 0))
+        self.texting_box.setMaximumSize(QSize(16777215, 16777215))
 
-    def receive_message(self, text):
-        self.chat_history.append(f"<span style='color: blue'><b>Friend:</b> {text}</span>")
+        self.retranslateUi(main_window)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = FullScreenMessenger()
-    window.showMaximized() 
-    sys.exit(app.exec())
+        QMetaObject.connectSlotsByName(main_window)
+    # setupUi
+
+    def retranslateUi(self, main_window):
+        main_window.setWindowTitle(QCoreApplication.translate("main_window", u"Dialog", None))
+        self.send_button.setText(QCoreApplication.translate("main_window", u"Send", None))
+    # retranslateUi
+
