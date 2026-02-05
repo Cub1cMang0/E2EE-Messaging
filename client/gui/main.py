@@ -1,8 +1,10 @@
 import sys
+import os
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog
 from app_gui import Ui_main_window
 from register_gui import Ui_Dialog
-from user_handling import handle_registration
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utilities.user_handling import handle_registration
 from add_new_gc import Ui_add_gc_window
 
 class MainWindow(QMainWindow):

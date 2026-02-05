@@ -1,5 +1,8 @@
-from cryptography.hazmat.primatives.asymmetric import ed25519
+from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import asyncio
 import os
 import requests
@@ -13,10 +16,13 @@ def gen_user_id():
         format=serialization.PublicFormat.Raw)
     return priv_key, pub_bytes
 
-def handle_registration(username, password):
+def handle_registration(username, display_name, password):
     priv_key, pub_bytes = gen_user_id()
     pub_hex = pub_bytes.hex()
     salt = os.urandom(16)
+    priv_bytes = priv_key.private_bytes(encoding=serialization.Encoding.Raw,
+        format=serialization.PrivateFormat.Raw, encryption_algorithm=serialization.NoEncryption()
+    )
     hkdf = HKDF(algorithm=hashes.SHA256(), length=32, salt=salt, info=b"local-storage-encryption")
     storage_key = hkdf.derive(password.encode())
     aesgcm = AESGCM(storage_key)
@@ -31,6 +37,7 @@ def handle_registration(username, password):
     }
     response = requests.post("http://127.0.0.1:8000/register", json=payload)
     return response
+
 class ChatServer:
     def __init__(self):
         self.users = {}
