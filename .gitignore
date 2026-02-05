@@ -33,6 +33,10 @@ wheels/
 *.swo
 *~
 
+# Database Stuff
+*.dat
+*.db
+
 # Environment variables
 .env
 .env.local
