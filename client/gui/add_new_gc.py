@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'add_new_gc.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.1
+## Created by: Qt User Interface Compiler version 6.10.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,43 +15,103 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QDialog, QLabel, QPushButton,
-    QSizePolicy, QTextEdit, QWidget)
+from PySide6.QtWidgets import (QApplication, QDialog, QHBoxLayout, QLabel,
+    QPushButton, QSizePolicy, QSpacerItem, QTextEdit,
+    QVBoxLayout, QWidget)
 
 class Ui_add_gc_window(object):
     def setupUi(self, add_gc_window):
         if not add_gc_window.objectName():
             add_gc_window.setObjectName(u"add_gc_window")
         add_gc_window.resize(655, 476)
-        self.user_search_box = QTextEdit(add_gc_window)
-        self.user_search_box.setObjectName(u"user_search_box")
-        self.user_search_box.setGeometry(QRect(180, 30, 351, 41))
+        self.verticalLayout_2 = QVBoxLayout(add_gc_window)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.horizontalLayout = QHBoxLayout()
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.user_to_add_label = QLabel(add_gc_window)
         self.user_to_add_label.setObjectName(u"user_to_add_label")
-        self.user_to_add_label.setGeometry(QRect(10, 30, 161, 41))
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.user_to_add_label.sizePolicy().hasHeightForWidth())
+        self.user_to_add_label.setSizePolicy(sizePolicy)
         font = QFont()
         font.setPointSize(22)
         self.user_to_add_label.setFont(font)
-        self.pushButton = QPushButton(add_gc_window)
-        self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setGeometry(QRect(550, 30, 94, 41))
-        self.user_list = QTextEdit(add_gc_window)
-        self.user_list.setObjectName(u"user_list")
-        self.user_list.setGeometry(QRect(10, 210, 631, 81))
+
+        self.horizontalLayout.addWidget(self.user_to_add_label)
+
+        self.user_search_box = QTextEdit(add_gc_window)
+        self.user_search_box.setObjectName(u"user_search_box")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.user_search_box.sizePolicy().hasHeightForWidth())
+        self.user_search_box.setSizePolicy(sizePolicy1)
+
+        self.horizontalLayout.addWidget(self.user_search_box)
+
+        self.search_button = QPushButton(add_gc_window)
+        self.search_button.setObjectName(u"search_button")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.search_button.sizePolicy().hasHeightForWidth())
+        self.search_button.setSizePolicy(sizePolicy2)
+
+        self.horizontalLayout.addWidget(self.search_button)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+
+        self.verticalLayout = QVBoxLayout()
+        self.verticalLayout.setObjectName(u"verticalLayout")
         self.users_being_added_label = QLabel(add_gc_window)
         self.users_being_added_label.setObjectName(u"users_being_added_label")
-        self.users_being_added_label.setGeometry(QRect(10, 150, 271, 41))
         self.users_being_added_label.setFont(font)
+
+        self.verticalLayout.addWidget(self.users_being_added_label)
+
+        self.user_list = QTextEdit(add_gc_window)
+        self.user_list.setObjectName(u"user_list")
+        sizePolicy1.setHeightForWidth(self.user_list.sizePolicy().hasHeightForWidth())
+        self.user_list.setSizePolicy(sizePolicy1)
+
+        self.verticalLayout.addWidget(self.user_list)
+
+
+        self.verticalLayout_2.addLayout(self.verticalLayout)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.pushButton_2 = QPushButton(add_gc_window)
         self.pushButton_2.setObjectName(u"pushButton_2")
-        self.pushButton_2.setGeometry(QRect(10, 420, 201, 41))
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
+        self.pushButton_2.setSizePolicy(sizePolicy3)
         font1 = QFont()
         font1.setPointSize(16)
         self.pushButton_2.setFont(font1)
+
+        self.horizontalLayout_2.addWidget(self.pushButton_2)
+
+        self.horizontalSpacer = QSpacerItem(228, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer)
+
         self.pushButton_3 = QPushButton(add_gc_window)
         self.pushButton_3.setObjectName(u"pushButton_3")
-        self.pushButton_3.setGeometry(QRect(440, 420, 201, 41))
+        sizePolicy3.setHeightForWidth(self.pushButton_3.sizePolicy().hasHeightForWidth())
+        self.pushButton_3.setSizePolicy(sizePolicy3)
         self.pushButton_3.setFont(font1)
+
+        self.horizontalLayout_2.addWidget(self.pushButton_3)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+
 
         self.retranslateUi(add_gc_window)
 
@@ -61,7 +121,7 @@ class Ui_add_gc_window(object):
     def retranslateUi(self, add_gc_window):
         add_gc_window.setWindowTitle(QCoreApplication.translate("add_gc_window", u"Add New Group Chat", None))
         self.user_to_add_label.setText(QCoreApplication.translate("add_gc_window", u"User to add:", None))
-        self.pushButton.setText(QCoreApplication.translate("add_gc_window", u"Search", None))
+        self.search_button.setText(QCoreApplication.translate("add_gc_window", u"Search", None))
         self.users_being_added_label.setText(QCoreApplication.translate("add_gc_window", u"Users being added:", None))
         self.pushButton_2.setText(QCoreApplication.translate("add_gc_window", u"Cancel", None))
         self.pushButton_3.setText(QCoreApplication.translate("add_gc_window", u"Create Group Chat", None))
