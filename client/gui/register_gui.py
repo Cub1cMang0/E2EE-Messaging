@@ -33,13 +33,13 @@ class Ui_Dialog(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.login_register_window.sizePolicy().hasHeightForWidth())
         self.login_register_window.setSizePolicy(sizePolicy)
-        self.page = QWidget()
-        self.page.setObjectName(u"page")
-        self.verticalLayout_2 = QVBoxLayout(self.page)
+        self.page_2 = QWidget()
+        self.page_2.setObjectName(u"page_2")
+        self.verticalLayout_2 = QVBoxLayout(self.page_2)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.username_hlayout = QHBoxLayout()
         self.username_hlayout.setObjectName(u"username_hlayout")
-        self.username_label_r = QLabel(self.page)
+        self.username_label_r = QLabel(self.page_2)
         self.username_label_r.setObjectName(u"username_label_r")
         font = QFont()
         font.setPointSize(22)
@@ -47,7 +47,7 @@ class Ui_Dialog(object):
 
         self.username_hlayout.addWidget(self.username_label_r)
 
-        self.username_r = QLineEdit(self.page)
+        self.username_r = QLineEdit(self.page_2)
         self.username_r.setObjectName(u"username_r")
         font1 = QFont()
         font1.setPointSize(16)
@@ -60,13 +60,13 @@ class Ui_Dialog(object):
 
         self.display_name_hlayout = QHBoxLayout()
         self.display_name_hlayout.setObjectName(u"display_name_hlayout")
-        self.display_label = QLabel(self.page)
+        self.display_label = QLabel(self.page_2)
         self.display_label.setObjectName(u"display_label")
         self.display_label.setFont(font)
 
         self.display_name_hlayout.addWidget(self.display_label)
 
-        self.display_name = QLineEdit(self.page)
+        self.display_name = QLineEdit(self.page_2)
         self.display_name.setObjectName(u"display_name")
         self.display_name.setFont(font1)
 
@@ -77,13 +77,13 @@ class Ui_Dialog(object):
 
         self.password_hlayout = QHBoxLayout()
         self.password_hlayout.setObjectName(u"password_hlayout")
-        self.password_label_r = QLabel(self.page)
+        self.password_label_r = QLabel(self.page_2)
         self.password_label_r.setObjectName(u"password_label_r")
         self.password_label_r.setFont(font)
 
         self.password_hlayout.addWidget(self.password_label_r)
 
-        self.password_r = QLineEdit(self.page)
+        self.password_r = QLineEdit(self.page_2)
         self.password_r.setObjectName(u"password_r")
         self.password_r.setFont(font1)
 
@@ -94,7 +94,7 @@ class Ui_Dialog(object):
 
         self.register_vlayout = QVBoxLayout()
         self.register_vlayout.setObjectName(u"register_vlayout")
-        self.register_button = QPushButton(self.page)
+        self.register_button = QPushButton(self.page_2)
         self.register_button.setObjectName(u"register_button")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy1.setHorizontalStretch(0)
@@ -105,8 +105,13 @@ class Ui_Dialog(object):
 
         self.register_vlayout.addWidget(self.register_button)
 
-        self.error_label_r = QLabel(self.page)
+        self.error_label_r = QLabel(self.page_2)
         self.error_label_r.setObjectName(u"error_label_r")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.error_label_r.sizePolicy().hasHeightForWidth())
+        self.error_label_r.setSizePolicy(sizePolicy2)
         self.error_label_r.setFont(font1)
         self.error_label_r.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -117,39 +122,37 @@ class Ui_Dialog(object):
 
         self.register_2_login_hlayout = QHBoxLayout()
         self.register_2_login_hlayout.setObjectName(u"register_2_login_hlayout")
-        self.login_label = QLabel(self.page)
+        self.login_label = QLabel(self.page_2)
         self.login_label.setObjectName(u"login_label")
-        self.login_label.setFont(font1)
+        self.login_label.setFont(font)
 
         self.register_2_login_hlayout.addWidget(self.login_label)
 
-        self.register_2_login = QPushButton(self.page)
+        self.register_2_login = QPushButton(self.page_2)
         self.register_2_login.setObjectName(u"register_2_login")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.register_2_login.sizePolicy().hasHeightForWidth())
         self.register_2_login.setSizePolicy(sizePolicy2)
+        self.register_2_login.setFont(font)
 
         self.register_2_login_hlayout.addWidget(self.register_2_login)
 
 
         self.verticalLayout_2.addLayout(self.register_2_login_hlayout)
 
-        self.login_register_window.addWidget(self.page)
-        self.page_2 = QWidget()
-        self.page_2.setObjectName(u"page_2")
-        self.verticalLayout_4 = QVBoxLayout(self.page_2)
+        self.login_register_window.addWidget(self.page_2)
+        self.page_1 = QWidget()
+        self.page_1.setObjectName(u"page_1")
+        self.verticalLayout_4 = QVBoxLayout(self.page_1)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.username_label_l = QLabel(self.page_2)
+        self.username_label_l = QLabel(self.page_1)
         self.username_label_l.setObjectName(u"username_label_l")
         self.username_label_l.setFont(font)
 
         self.horizontalLayout.addWidget(self.username_label_l)
 
-        self.username_l = QLineEdit(self.page_2)
+        self.username_l = QLineEdit(self.page_1)
         self.username_l.setObjectName(u"username_l")
         self.username_l.setFont(font1)
 
@@ -160,13 +163,13 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.password_label_l = QLabel(self.page_2)
+        self.password_label_l = QLabel(self.page_1)
         self.password_label_l.setObjectName(u"password_label_l")
         self.password_label_l.setFont(font)
 
         self.horizontalLayout_2.addWidget(self.password_label_l)
 
-        self.password_l = QLineEdit(self.page_2)
+        self.password_l = QLineEdit(self.page_1)
         self.password_l.setObjectName(u"password_l")
         self.password_l.setFont(font1)
 
@@ -177,14 +180,18 @@ class Ui_Dialog(object):
 
         self.verticalLayout_3 = QVBoxLayout()
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.login_button = QPushButton(self.page_2)
+        self.login_button = QPushButton(self.page_1)
         self.login_button.setObjectName(u"login_button")
+        sizePolicy1.setHeightForWidth(self.login_button.sizePolicy().hasHeightForWidth())
+        self.login_button.setSizePolicy(sizePolicy1)
         self.login_button.setFont(font)
 
         self.verticalLayout_3.addWidget(self.login_button)
 
-        self.error_label_l = QLabel(self.page_2)
+        self.error_label_l = QLabel(self.page_1)
         self.error_label_l.setObjectName(u"error_label_l")
+        sizePolicy2.setHeightForWidth(self.error_label_l.sizePolicy().hasHeightForWidth())
+        self.error_label_l.setSizePolicy(sizePolicy2)
         self.error_label_l.setFont(font1)
         self.error_label_l.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -195,21 +202,24 @@ class Ui_Dialog(object):
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.register_label = QLabel(self.page_2)
+        self.register_label = QLabel(self.page_1)
         self.register_label.setObjectName(u"register_label")
-        self.register_label.setFont(font1)
+        self.register_label.setFont(font)
 
         self.horizontalLayout_3.addWidget(self.register_label)
 
-        self.login_2_register = QPushButton(self.page_2)
+        self.login_2_register = QPushButton(self.page_1)
         self.login_2_register.setObjectName(u"login_2_register")
+        sizePolicy2.setHeightForWidth(self.login_2_register.sizePolicy().hasHeightForWidth())
+        self.login_2_register.setSizePolicy(sizePolicy2)
+        self.login_2_register.setFont(font)
 
         self.horizontalLayout_3.addWidget(self.login_2_register)
 
 
         self.verticalLayout_4.addLayout(self.horizontalLayout_3)
 
-        self.login_register_window.addWidget(self.page_2)
+        self.login_register_window.addWidget(self.page_1)
 
         self.verticalLayout.addWidget(self.login_register_window)
 
