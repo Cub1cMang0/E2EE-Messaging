@@ -13,6 +13,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     display_name = Column(String)
-    pub_key = Column(String)
+    id_pub_key = Column(String)
+    dh_pub_key = Column(String)
 
 Base.metadata.create_all(bind=engine)
