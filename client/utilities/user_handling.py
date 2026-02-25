@@ -21,6 +21,7 @@ def get_priv_key_dir(username):
         QDir().mkpath(path)
     return os.path.join(path, f"{username}.dat")
 
+# Gets fetches the server's public key
 def get_server_pub_key() -> x25519.X25519PublicKey | None:
     try:
         response = requests.get("http://127.0.0.1:8000/pub_key", timeout=5)
@@ -48,6 +49,7 @@ def gen_user_id():
     )
     return id_priv_key, id_pub_bytes, dh_priv_key, dh_pub_bytes
 
+# Creats, encrypts and stores new users' public key. Also locally stores new users' private key.
 def handle_registration(username, display_name, password):
     id_priv_key, id_pub_bytes, dh_priv_key, dh_pub_bytes = gen_user_id()
     id_priv_bytes = id_priv_key.private_bytes(encoding=serialization.Encoding.Raw, 
@@ -84,6 +86,7 @@ def handle_registration(username, display_name, password):
     except Exception as e:
         return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
 
+# Fetches users' private key and sends a payload to the server and attempts to log the users in.
 def handle_login(username, password):
     file_path = get_priv_key_dir(username)
     if not os.path.exists(file_path):
