@@ -88,10 +88,17 @@ def handle_registration(username, display_name, password):
         "dh_pub_key": dh_pub_bytes.hex()
     }
     try:
-        response = requests.post("http://127.0.0.1:8000/register", json=payload, timeout=5)        
-        if response.status_code != 200:
+        response = requests.post("http://127.0.0.1:8000/register", json=payload, timeout=5)    
+        if response.status_code == 200:
+            return {"success": True, "data": response.json()}    
+        elif response.status_code == 400:
+            try:
+                error_detail = response.json().get("detail", "Registration failed.")
+                return {"success": False, "error": error_detail}
+            except:
+                return {"success": False, "error": "Malformed error response from server."}
+        else:
             return {"success": False, "error": f"Server Error: {response.status_code}"}
-        return {"success": True, "data": response.json()}
     except requests.exceptions.ConnectionError:
         return {"success": False, "error": "Server is offline. Check your connection."}
     except requests.exceptions.Timeout:
