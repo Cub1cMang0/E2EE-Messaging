@@ -12,7 +12,7 @@ import json
 import requests
 from PySide6.QtCore import QStandardPaths, QDir
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from crytpo.protocol import send_message
+from crypto.protocol import send_message
 
 # Uses to retrieve location of user's locally stored private key
 def get_priv_key_dir(username):

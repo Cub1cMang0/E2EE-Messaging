@@ -4,7 +4,7 @@ from typing import List, Dict
 import os
 import base64
 from client.utilities.database import SessionLocal, User
-from crytpo.protocol import receive_message, MessagePayload
+from crypto.protocol import receive_message, MessagePayload
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
