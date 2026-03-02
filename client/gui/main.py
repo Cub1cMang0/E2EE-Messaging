@@ -2,6 +2,7 @@ import sys
 import os
 import re
 import json
+import requests
 from PySide6.QtWidgets import QApplication, QMainWindow, QDialog, QWidget, QLineEdit
 from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
@@ -122,9 +123,13 @@ class AddNewGC_Window(QDialog):
         if response.status_code == 200:
             user_data = response.json()
             self.ui.user_list.addItem(user_data['display_name'])
+            self.ui.error_label.hide()
         elif response.status_code == 404:
             self.ui.error_label.show()
             self.ui.error_label.setText("User does not exist")
+        else:
+            self.ui.error_label.setText(f"Error: {response.status_code}")
+            self.ui.error_label.show()
 
 
 if __name__ == "__main__":

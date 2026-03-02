@@ -23,6 +23,12 @@ class ConnectToUser(BaseModel): # can add key exchange
     id_pub_key: str
     dh_pub_key: str
 
+class UserRegister(BaseModel):
+    username: str
+    display_name: str
+    id_pub_key: str
+    dh_pub_key: str
+
 # Mirrors MessagePayload
 class UserLogin(BaseModel):
     ciphertext: bytes | str
@@ -167,9 +173,12 @@ def get_public_key():
 
 @app.post("/register")
 async def register_user(user: UserRegister, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.username == user.username).first()
-    if existing_user:
+    existing_username = db.query(User).filter(User.username == user.username).first()
+    existing_display_name = db.query(User).filter(User.display_name == user.display_name).first()
+    if existing_username:
         raise HTTPException(status_code=400, detail="Username already exist")
+    elif existing_display_name:
+        raise HTTPException(status_code=400, detail="Display name already exist")
     new_user = User(username=user.username,
         display_name=user.display_name,
         id_pub_key=user.id_pub_key,
@@ -210,15 +219,16 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Authentication or decryption failed: {str(e)}")
 
-@app.get("/search/{username}")
-async def search_user(username: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == username).first()
+@app.get("/search/{display_name}")
+async def search_user(display_name: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.display_name == display_name).first()
     if not user:
         raise HTTPException(status_code=404, detail="User does not exist")
     return {
         "username": user.username,
         "display_name": user.display_name,
-        "pub_key": user.pub_key
+        "id_pub_key": user.id_pub_key,
+        "dh_pub_key": user.dh_pub_key
     }
 
 @app.get("/users")
