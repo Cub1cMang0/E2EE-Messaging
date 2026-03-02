@@ -1,4 +1,5 @@
 from typing import Any, TypedDict
+
 from .aead import decrypt_ciphertext, encrypt_plaintext
 from .dh import shared_secret_generate
 from .hkdf import derived_key_generate
@@ -12,9 +13,6 @@ class MessagePayload(TypedDict, total=False):
     signature: bytes | str
     sender_id: str
     recipient_id: str
-
-
-
 
 #Encrypt and sign a message for the recipient.
 def send_message(
@@ -75,7 +73,3 @@ def receive_message(
     
     #5. Return plaintext.
     return plain_text
-    
-    
-
-

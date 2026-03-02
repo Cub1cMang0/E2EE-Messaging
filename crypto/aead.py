@@ -13,4 +13,3 @@ def encrypt_plaintext(plain_text: bytes, derived_key: bytes) -> tuple[bytes, byt
 def decrypt_ciphertext(cipher_text: bytes, nonce: bytes, derived_key: bytes) -> bytes:
     """Decrypt AEAD ciphertext. Raises if tag verification fails (tampered or wrong key)."""
     return crypto_aead_xchacha20poly1305_ietf_decrypt(cipher_text, None, nonce, derived_key)
-
