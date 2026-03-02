@@ -7,12 +7,14 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Defining database structure and contents
 class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     display_name = Column(String)
-    pub_key = Column(String)
+    id_pub_key = Column(String)
+    dh_pub_key = Column(String)
 
 Base.metadata.create_all(bind=engine)
