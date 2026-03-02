@@ -137,6 +137,17 @@ class ConnectionManager:
             return {"success": True, "message": "sent"}
         except:
             return {"success": False, "error": "Failed to send message"}
+    
+
+    # send a raw message to a recipient
+    async def send_raw(self, recipient: str, data: dict):
+        if recipient not in self.connections:
+            return {"success": False, "error": f"{recipient} is not online"}
+        try:
+            await self.connections[recipient].send_text(json.dumps(data))
+            return {"success": True, "message": "sent"}
+        except:
+            return {"success": False, "error": "Failed to send message"}
 
 manager = ConnectionManager()
 
@@ -234,7 +245,8 @@ async def search_user(username: str, db: Session = Depends(get_db)):
     return {
         "username": user.username,
         "display_name": user.display_name,
-        "pub_key": user.pub_key
+        "id_pub_key": user.id_pub_key,
+        "dh_pub_key": user.dh_pub_key,
     }
 
 @app.get("/users")
@@ -261,12 +273,19 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 await websocket.send_text(json.dumps(response))
                 
             elif message_data.get("type") == "message":
-                message = Message(
-                    sender=message_data["sender"],
-                    recipient=message_data["recipient"],
-                    content=message_data["content"]
-                )
-                await manager.send_message(message)
+                # message_data["payload"] is a dict like MessagePayload but base64-encoded
+                await manager.send_raw(message_data["recipient"], {
+                    "type": "message",
+                    "sender": username,
+                    "payload": message_data["payload"],
+                })
+
+                # message = Message(
+                #     sender=message_data["sender"],
+                #     recipient=message_data["recipient"],
+                #     content=message_data["content"]
+                # )
+                # await manager.send_message(message)
                 
     except WebSocketDisconnect:
         manager.disconnect_from_server(username)

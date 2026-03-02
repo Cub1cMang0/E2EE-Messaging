@@ -25,8 +25,11 @@ password_regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?
 RESERVED_NAMES = ["admin", "root", "support", "moderator", "staff", "system"]
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, username, id_priv_key, dh_priv_key):
         super().__init__()
+        self.username = username
+        self.id_priv_key = id_priv_key
+        self.dh_priv_key = dh_priv_key
         self.ui = Ui_main_window()
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -93,6 +96,9 @@ class Login_Register_Window(QDialog):
         password = self.ui.password_l.text()
         response = handle_login(username, password)
         if response["success"]:
+            self.logged_in_username = username
+            self.id_priv_key = response["id_priv_key"]
+            self.dh_priv_key = response["dh_priv_key"]
             self.handle_login_success()
         else:
             self.ui.error_label_l.show()
@@ -131,7 +137,11 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     login_register_window = Login_Register_Window()
     if login_register_window.exec() == QDialog.DialogCode.Accepted:
-        main_chat = MainWindow()
+        main_chat = MainWindow(
+            username=login_register_window.logged_in_username,
+            id_priv_key=login_register_window.id_priv_key,
+            dh_priv_key=login_register_window.dh_priv_key,
+        )
         main_chat.show()
         sys.exit(app.exec())
     else:

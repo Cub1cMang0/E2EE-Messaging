@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.asymmetric import x25519
+from typing import TypedDict, Literal
 import base64
 import asyncio
 import os
@@ -13,6 +14,18 @@ import requests
 from PySide6.QtCore import QStandardPaths, QDir
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from crypto.protocol import send_message
+
+class EncryptedPayload(TypedDict):
+    ciphertext: str      # base64 of bytes
+    nonce: str           # base64 of bytes
+    signature: str       # base64 of bytes
+    sender_id: str
+    recipient_id: str
+
+class OutgoingWsMessage(TypedDict):
+    type: Literal["message"] # could add other types in the future
+    recipient: str
+    payload: EncryptedPayload
 
 # Uses to retrieve location of user's locally stored private key
 def get_priv_key_dir(username):
@@ -137,11 +150,16 @@ def handle_login(username, password):
         return {
             "success": True, 
             "data": response.json(),
-            "private_key_loaded": True
+            "private_key_loaded": True,
+            "id_priv_key": id_priv_key,
+            "dh_priv_key": dh_priv_key,
         }
+    
     except Exception as e:
         print(e)
         return {"success": False, "error": f"Encryption or network error: {str(e)}"}
+    
+    
 
 
 class ChatServer:

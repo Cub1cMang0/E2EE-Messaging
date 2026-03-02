@@ -33,3 +33,5 @@ print(decrypted.decode("utf-8"))
 
 assert decrypted == plaintext
 print("Crypto round-trip OK!")
+
+# Run python -m crypto.test_crypto from root
