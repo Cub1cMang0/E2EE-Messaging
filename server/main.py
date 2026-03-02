@@ -2,6 +2,9 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import List, Dict
 import os
+import json
+from sqlalchemy.orm import Session
+from fastapi import Depends, HTTPException
 import base64
 from client.utilities.database import SessionLocal, User
 from crytpo.protocol import receive_message, MessagePayload
@@ -23,6 +26,12 @@ class ConnectToUser(BaseModel): # can add key exchange
     id_pub_key: str
     dh_pub_key: str
 
+class UserRegister(BaseModel):
+    username: str
+    display_name: str
+    identity_pub_key: str
+    dh_pub_key: str
+
 # Mirrors MessagePayload
 class UserLogin(BaseModel):
     ciphertext: bytes | str
@@ -30,6 +39,13 @@ class UserLogin(BaseModel):
     signature: bytes | str
     sender_id: str
     recipient_id: str
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 class ConnectionManager:
     def __init__(self):
