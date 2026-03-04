@@ -6,7 +6,7 @@ import json
 from sqlalchemy.orm import Session
 from fastapi import Depends, HTTPException
 import base64
-from client.utilities.database import SessionLocal, User
+from client.utilities.database import SessionLocal, User, Group, Group_Member, Group_Create
 from crypto.protocol import receive_message, MessagePayload
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives import serialization
@@ -151,6 +151,7 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+# Used to fetch server key (or create if it doesn't exist)
 def get_server_key() -> x25519.X25519PrivateKey:
     if os.path.exists(SERVER_KEY_FILE):
         with open(SERVER_KEY_FILE, "rb") as file:
@@ -166,6 +167,7 @@ def get_server_key() -> x25519.X25519PrivateKey:
             ))
         return priv_key
 
+# Used to query for a user's public keys from the database
 def get_client_pub_keys(db: Session, username: str):
     user = db.query(User).filter(User.username == username).first()
     if not user:
@@ -183,6 +185,7 @@ server_dh_public = server_dh_private.public_key()
 def health_check():
     return {"status": "messaging server running"}
 
+# Used to send the server's public key for communication
 @app.get("/pub_key")
 def get_public_key():
     pub_key = server_dh_private.public_key()
@@ -192,6 +195,7 @@ def get_public_key():
     )
     return {"server_dh_public": pub_bytes.hex()}
 
+# Used to attempt to register and store a user in the database
 @app.post("/register")
 async def register_user(user: UserRegister, db: Session = Depends(get_db)):
     existing_username = db.query(User).filter(User.username == user.username).first()
@@ -208,7 +212,7 @@ async def register_user(user: UserRegister, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     return {"message": f"User {user.username} has been registered"}
-
+# Used to attempt to login a user
 @app.post("/login")
 def login_user(payload: UserLogin, db: Session = Depends(get_db)):
     try:
@@ -240,8 +244,9 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Authentication or decryption failed: {str(e)}")
 
-@app.get("/search/{display_name}")
-async def search_user(display_name: str, db: Session = Depends(get_db)):
+# Searches for a user by display name
+@app.get("/search_dn/{display_name}")
+async def search_display_name(display_name: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.display_name == display_name).first()
     if not user:
         raise HTTPException(status_code=404, detail="User does not exist")
@@ -250,6 +255,92 @@ async def search_user(display_name: str, db: Session = Depends(get_db)):
         "display_name": user.display_name,
         "id_pub_key": user.id_pub_key,
         "dh_pub_key": user.dh_pub_key
+    }
+
+@app.get("/search_un/{username}")
+async def search_username(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User does not exist")
+    return {
+        "username": user.username,
+        "display_name": user.display_name,
+        "id_pub_key": user.id_pub_key,
+        "dh_pub_key": user.dh_pub_key
+    }
+
+# Used to create a group chat and store it in the database
+@app.post("/groups/create")
+async def create_group_chat(group_data: Group_Create, db: Session = Depends(get_db)):
+    creator = db.query(User).filter(User.display_name == group_data.creator_display_name).first()
+    if not creator:
+        raise HTTPException(status_code=404, detail="Creator user not found")
+    # v Used to ensure no true duplicate chats are created
+    members = db.query(User).filter(User.display_name.in_(group_data.members_display_names)).all()
+    target_user_ids = {u.id for u in members}
+    target_user_ids.add(creator.id)
+    potential_groups = db.query(Group_Member.group_id).filter(Group_Member.user_id == creator.id).all()
+    potential_group_ids = [g[0] for g in potential_groups]
+    for g_id in potential_group_ids:
+        existing_member_ids = {m.user_id for m in db.query(Group_Member).filter(Group_Member.group_id == g_id).all()}
+        if existing_member_ids == target_user_ids:
+            existing_group = db.query(Group).filter(Group.id == g_id).first()
+            if existing_group.chat_name == group_data.name:
+                raise HTTPException(status_code=400, detail=f"A group named '{group_data.name}' with these exact members alreday exists")
+    # ^ Used to ensure no true duplicate group chats are created
+    new_group = Group(
+        chat_name=group_data.name,
+        creator=creator.id
+    )
+    db.add(new_group)
+    db.commit()
+    db.refresh(new_group)
+    admin_member = Group_Member(
+        group_id=new_group.id,
+        user_id=creator.id,
+        role="admin"
+    )
+    db.add(admin_member)
+    for display_name in group_data.members_display_names:
+        if display_name == creator.display_name:
+            continue            
+        user = db.query(User).filter(User.display_name == display_name).first()
+        if user:
+            new_member = Group_Member(
+                group_id=new_group.id,
+                user_id=user.id,
+                role="member"
+            )
+            db.add(new_member)
+        else:
+            print(f"Warning: User {username} not found, skipping.")
+    db.commit()
+    return {
+        "success": True, 
+        "message": f"Group '{new_group.chat_name}' created successfully!",
+        "group_id": new_group.id
+    }
+
+# Used to fetch the user's group chats that they are a part of during login
+@app.get("/users/{display_name}/groups")
+def get_user_gcs(display_name, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.display_name == display_name).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User does not exist")
+    user_group_chats = db.query(Group).join(Group_Member).filter(Group_Member.user_id == user.id).all()
+    group_chats_data = [{"group_id": g.id, "name": g.chat_name} for g in user_group_chats]
+    return {"success": True, "group_chats": group_chats_data}
+
+# Fetch a single group chat (used to add newly created group chats dynamically to the GUI)
+@app.get("/groups/{group_id}")
+async def get_single_group(group_id: int, db: Session = Depends(get_db)):
+    group = db.query(Group).filter(Group.id == group_id).first()
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")        
+    return {
+        "id": group.id,
+        "chat_name": group.chat_name,
+        "created_on": group.created_on.isoformat() if group.created_on else None
     }
 
 @app.get("/users")
