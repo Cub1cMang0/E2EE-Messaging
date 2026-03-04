@@ -23,7 +23,7 @@ class Ui_add_gc_window(object):
     def setupUi(self, add_gc_window):
         if not add_gc_window.objectName():
             add_gc_window.setObjectName(u"add_gc_window")
-        add_gc_window.resize(655, 476)
+        add_gc_window.resize(846, 587)
         self.verticalLayout_2 = QVBoxLayout(add_gc_window)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.horizontalLayout = QHBoxLayout()
@@ -98,30 +98,50 @@ class Ui_add_gc_window(object):
 
         self.verticalLayout_2.addLayout(self.verticalLayout)
 
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.group_chat_label = QLabel(add_gc_window)
+        self.group_chat_label.setObjectName(u"group_chat_label")
+        sizePolicy.setHeightForWidth(self.group_chat_label.sizePolicy().hasHeightForWidth())
+        self.group_chat_label.setSizePolicy(sizePolicy)
+        self.group_chat_label.setFont(font)
+
+        self.horizontalLayout_3.addWidget(self.group_chat_label)
+
+        self.group_chat_name = QLineEdit(add_gc_window)
+        self.group_chat_name.setObjectName(u"group_chat_name")
+        sizePolicy1.setHeightForWidth(self.group_chat_name.sizePolicy().hasHeightForWidth())
+        self.group_chat_name.setSizePolicy(sizePolicy1)
+
+        self.horizontalLayout_3.addWidget(self.group_chat_name)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_3)
+
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.pushButton_2 = QPushButton(add_gc_window)
-        self.pushButton_2.setObjectName(u"pushButton_2")
+        self.cancel_button = QPushButton(add_gc_window)
+        self.cancel_button.setObjectName(u"cancel_button")
         sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         sizePolicy4.setHorizontalStretch(0)
         sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
-        self.pushButton_2.setSizePolicy(sizePolicy4)
-        self.pushButton_2.setFont(font1)
+        sizePolicy4.setHeightForWidth(self.cancel_button.sizePolicy().hasHeightForWidth())
+        self.cancel_button.setSizePolicy(sizePolicy4)
+        self.cancel_button.setFont(font1)
 
-        self.horizontalLayout_2.addWidget(self.pushButton_2)
+        self.horizontalLayout_2.addWidget(self.cancel_button)
 
         self.horizontalSpacer = QSpacerItem(228, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer)
 
-        self.pushButton_3 = QPushButton(add_gc_window)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-        sizePolicy4.setHeightForWidth(self.pushButton_3.sizePolicy().hasHeightForWidth())
-        self.pushButton_3.setSizePolicy(sizePolicy4)
-        self.pushButton_3.setFont(font1)
+        self.create_gc_button = QPushButton(add_gc_window)
+        self.create_gc_button.setObjectName(u"create_gc_button")
+        sizePolicy4.setHeightForWidth(self.create_gc_button.sizePolicy().hasHeightForWidth())
+        self.create_gc_button.setSizePolicy(sizePolicy4)
+        self.create_gc_button.setFont(font1)
 
-        self.horizontalLayout_2.addWidget(self.pushButton_3)
+        self.horizontalLayout_2.addWidget(self.create_gc_button)
 
 
         self.verticalLayout_2.addLayout(self.horizontalLayout_2)
@@ -138,7 +158,8 @@ class Ui_add_gc_window(object):
         self.search_button.setText(QCoreApplication.translate("add_gc_window", u"Search", None))
         self.error_label.setText(QCoreApplication.translate("add_gc_window", u"TextLabel", None))
         self.users_being_added_label.setText(QCoreApplication.translate("add_gc_window", u"Users being added:", None))
-        self.pushButton_2.setText(QCoreApplication.translate("add_gc_window", u"Cancel", None))
-        self.pushButton_3.setText(QCoreApplication.translate("add_gc_window", u"Create Group Chat", None))
+        self.group_chat_label.setText(QCoreApplication.translate("add_gc_window", u"Group Chat Name:", None))
+        self.cancel_button.setText(QCoreApplication.translate("add_gc_window", u"Cancel", None))
+        self.create_gc_button.setText(QCoreApplication.translate("add_gc_window", u"Create Group Chat", None))
     # retranslateUi
 
