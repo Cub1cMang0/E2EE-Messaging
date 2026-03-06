@@ -161,13 +161,72 @@ def handle_login(username, password):
             "id_priv_key": id_priv_key,
             "dh_priv_key": dh_priv_key,
         }
-    
     except Exception as e:
         print(e)
         return {"success": False, "error": f"Encryption or network error: {str(e)}"}
-    
-    
 
+# Sends the server a request to create a group chat
+def handle_gc_creation(group_name, creator_display_name, display_name_list):
+    payload = {
+        "name": group_name,
+        "creator_display_name": creator_display_name,
+        "members_display_names": display_name_list
+    }
+    try:
+        response = requests.post("http://127.0.0.1:8000/groups/create", json=payload)
+        if response.status_code == 200:
+            return {"success": True, "data": response.json()}
+        elif response.status_code == 404:
+            try:
+                error_detail = response.json().get("detail", "Creator or member not found.")
+                return {"success": False, "error": error_detail}
+            except:
+                return {"success": False, "error": "Malformed error response from server."}
+        elif response.status_code == 422:
+            return {"success": False, "error": f"Validation Error: {response.json()}"}
+        elif response.status_code == 400:
+            try:
+                error_detail = response.json().get("detail", "Creator or member not found.")
+                return {"success": False, "error": error_detail}
+            except:
+                return {"success": False, "error": "Malformed error response from server."}
+        # Unhandled Server Errors
+        else:
+            return {"success": False, "error": f"Server Error: {response.status_code}"}       
+    #Handle network-level exceptions
+    except requests.exceptions.ConnectionError:
+        return {"success": False, "error": "Server is offline. Check your connection."}
+    except requests.exceptions.Timeout:
+        return {"success": False, "error": "The request timed out."}
+    except Exception as e:
+        return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
+
+# Fetches the user's group chats for the client to process
+def fetch_user_gcs(display_name):
+    try:
+        response = requests.get(f"http://127.0.0.1:8000/users/{display_name}/groups", timeout=5)    
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 404:
+            return {"success": False, "error": "User not found on server."}
+        else:
+            return {"success": False, "error": f"Server Error: {response.status_code}"}
+    except requests.exceptions.ConnectionError:
+        return {"success": False, "error": "Server is offline."}
+    except Exception as e:
+        return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
+
+# Used to fetch a single group chat for the purposes of dynamically adding to group chat
+def fetch_gc(group_id):
+    try:
+        url = f"http://127.0.0.1:8000/groups/{group_id}"
+        response = requests.get(url)
+        if response.status_code == 200:
+            return {"success": True, "result": response}
+        else:
+            return {"success": False, "result": response.status_code}
+    except Exception as e:
+        return {"success": False, "result": e}
 
 class ChatServer:
     def __init__(self):
