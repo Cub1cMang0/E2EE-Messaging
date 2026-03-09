@@ -159,6 +159,7 @@ class AddNewGC_Window(QDialog):
                 self.ui.error_label.show()
             elif response.status_code == 200:
                 user_data = response.json()
+                self.ui.user_list.clear()
                 self.ui.user_list.addItem(user_data['display_name'])
             elif response.status_code == 404:
                 self.ui.error_label.setText("User does not exist")
@@ -172,15 +173,19 @@ class AddNewGC_Window(QDialog):
         group_chat_name = self.ui.group_chat_name.text()
         creator_d_name = self.display_name
         display_name_list = [self.ui.user_list.item(x).text() for x in range(self.ui.user_list.count())]
-        response = handle_gc_creation(group_chat_name, creator_d_name, display_name_list)
-        if response["success"]:
-            self.ui.user_list.clear()
-            self.ui.error_label.setText(f"Successfully created {group_chat_name}")
-            self.ui.error_label.show()
-            new_id = response["data"].get("group_id")
-            self.new_gc_created.emit(new_id)
+        if group_chat_name.strip() != "" and len(display_name_list) != 0:
+            response = handle_gc_creation(group_chat_name, creator_d_name, display_name_list)
+            if response["success"]:
+                self.ui.user_list.clear()
+                self.ui.error_label.setText(f"Successfully created {group_chat_name}")
+                self.ui.error_label.show()
+                new_id = response["data"].get("group_id")
+                self.new_gc_created.emit(new_id)
+            else:
+                self.ui.error_label.setText(f"{response["error"]}")
+                self.ui.error_label.show()
         else:
-            self.ui.error_label.setText(f"{response["error"]}")
+            self.ui.error_label.setText("Cannot create group chat with empty fields")
             self.ui.error_label.show()
 
 if __name__ == "__main__":
