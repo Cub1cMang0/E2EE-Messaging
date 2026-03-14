@@ -82,7 +82,15 @@ class Login_Register_Window(QDialog):
         elif re.match(password_regex, password):
             response = handle_registration(username, display_name, password)
             if response["success"]:
-                self.handle_login_success()
+                login_response = handle_login(username, password)
+                if login_response["success"]:
+                    self.logged_in_username = username
+                    self.id_priv_key = login_response["id_priv_key"]
+                    self.dh_priv_key = login_response["dh_priv_key"]
+                    self.handle_login_success()
+                else:
+                    self.ui.error_label_r.show()
+                    self.ui.error_label_r.setText(login_response.get("error", "Registration ok but login failed."))
             else:
                 self.ui.error_label_r.show()
                 self.ui.error_label_r.setText(response['error'])

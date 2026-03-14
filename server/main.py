@@ -29,7 +29,7 @@ class ConnectToUser(BaseModel): # can add key exchange
 class UserRegister(BaseModel):
     username: str
     display_name: str
-    identity_pub_key: str
+    id_pub_key: str
     dh_pub_key: str
 
 # Mirrors MessagePayload
