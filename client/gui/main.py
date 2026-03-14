@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utilities.user_handling import handle_registration, handle_login, handle_gc_creation, fetch_user_gcs, fetch_gc
 from utilities.search_utility import search_user_by_dn, search_user_by_un
 from add_new_gc import Ui_add_gc_window
-
+from utilities.config import set_mode
 # These are used as guidelines for users on what they can add to their credentials
 # (What they can and can't have in thier username/password/displayname)
 user_regex = QRegularExpression("^[a-zA-Z0-9_]{8,32}$")
@@ -189,6 +189,15 @@ class AddNewGC_Window(QDialog):
             self.ui.error_label.show()
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        mode = "local"
+
+    mode = sys.argv[1].lower()
+
+    set_mode(mode)
+    
+    print(f"Starting client in {mode.upper()} mode")
+    
     app = QApplication(sys.argv)
     login_register_window = Login_Register_Window()
     if login_register_window.exec() == QDialog.DialogCode.Accepted:
