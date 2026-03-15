@@ -93,7 +93,12 @@ def handle_registration(username, display_name, password):
         base_url = get_base_url()
         response = requests.post(f"{base_url}/register", json=payload, timeout=5)    
         if response.status_code == 200:
-            return {"success": True, "data": response.json()}    
+            return {
+                "success": True,
+                "data": response.json(),
+                "id_priv_key": id_priv_key,
+                "dh_priv_key": dh_priv_key
+            }    
         elif response.status_code == 400:
             try:
                 error_detail = response.json().get("detail", "Registration failed.")
@@ -158,9 +163,13 @@ def handle_login(username, password):
         response = requests.post(f"{base_url}/login", json=json_payload, timeout=5)        
         if response.status_code != 200:
             return {"success": False, "error": f"Server Error: {response.text}"}
+        server_response = response.json()
         return {
             "success": True, 
-            "data": response.json(),
+            "data": {
+                "username": server_response.get("username"),
+                "display_name": server_response.get("display_name")
+            },
             "private_key_loaded": True,
             "id_priv_key": id_priv_key,
             "dh_priv_key": dh_priv_key,
@@ -207,10 +216,16 @@ def handle_gc_creation(group_name, creator_display_name, display_name_list):
         return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
 
 # Fetches the user's group chats for the client to process
-def fetch_user_gcs(display_name):
+def fetch_user_gcs(display_name, username, id_priv_key):
     try:
         base_url = get_base_url()
-        response = requests.get(f"{base_url}/users/{display_name}/groups", timeout=5)    
+        # added a signature thing so the user can only fetch their own gcs (more secure)
+        signature = base64.b64encode(id_priv_key.sign(username.encode())).decode()
+        response = requests.get(
+            f"{base_url}/users/{display_name}/groups",
+            params={"requester": username, "signature": signature},
+            timeout=5
+        )    
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
@@ -229,7 +244,7 @@ def fetch_gc(group_id):
         url = f"{base_url}/groups/{group_id}"
         response = requests.get(url)
         if response.status_code == 200:
-            return {"success": True, "result": response}
+            return {"success": True, "result": response.json()} #changed to keep pattern of .json( doesnt actually matter)
         else:
             return {"success": False, "result": response.status_code}
     except Exception as e:

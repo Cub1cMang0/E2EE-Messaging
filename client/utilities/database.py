@@ -37,9 +37,41 @@ class Group_Member(Base):
     joined_at = Column(DateTime, default=datetime.datetime.utcnow)
     group = relationship("Group", back_populates="members")
 
+class Message(Base):
+    __tablename__ = "messages"
+    id = Column(Integer, primary_key=True, index=True)
+    group_id = Column(Integer, ForeignKey("group_chats.id"))
+    sender = Column(String)
+    text = Column(String)
+    timestamp = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+
 class Group_Create(BaseModel):
     name: str
     creator_display_name: str
     members_display_names: List[str]
 
 Base.metadata.create_all(bind=engine)
+
+# stuff to save messages on the client side (server still can't see these)
+def save_message(group_id: int, sender: str, text: str):
+    """Save a message to the database"""
+    try:
+        db = SessionLocal()
+        message = Message(group_id=group_id, sender=sender, text=text)
+        db.add(message)
+        db.commit()
+        db.close()
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def get_messages(group_id: int):
+    """Retrieve all messages for a group chat from the database"""
+    try:
+        db = SessionLocal()
+        messages = db.query(Message).filter(Message.group_id == group_id).order_by(Message.timestamp).all()
+        db.close()
+        return {"success": True, "messages": messages}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+    
