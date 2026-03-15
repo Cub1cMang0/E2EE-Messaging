@@ -14,6 +14,7 @@ import requests
 from PySide6.QtCore import QStandardPaths, QDir
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from crypto.protocol import send_message
+from .config import get_base_url
 
 class EncryptedPayload(TypedDict):
     ciphertext: str      # base64 of bytes
@@ -37,7 +38,8 @@ def get_priv_key_dir(username):
 # Gets fetches the server's public key
 def get_server_pub_key() -> x25519.X25519PublicKey | None:
     try:
-        response = requests.get("http://127.0.0.1:8000/pub_key", timeout=5)
+        base_url = get_base_url()
+        response = requests.get(f"{base_url}/pub_key", timeout=5)
         if response.status_code == 200:
             pub_hex = response.json().get("server_dh_public")
             pub_bytes = bytes.fromhex(pub_hex)
@@ -88,9 +90,15 @@ def handle_registration(username, display_name, password):
         "dh_pub_key": dh_pub_bytes.hex()
     }
     try:
-        response = requests.post("http://127.0.0.1:8000/register", json=payload, timeout=5)    
+        base_url = get_base_url()
+        response = requests.post(f"{base_url}/register", json=payload, timeout=5)    
         if response.status_code == 200:
-            return {"success": True, "data": response.json()}    
+            return {
+                "success": True,
+                "data": response.json(),
+                "id_priv_key": id_priv_key,
+                "dh_priv_key": dh_priv_key
+            }    
         elif response.status_code == 400:
             try:
                 error_detail = response.json().get("detail", "Registration failed.")
@@ -151,12 +159,17 @@ def handle_login(username, password):
             "sender_id": e2ee_payload["sender_id"],
             "recipient_id": e2ee_payload["recipient_id"]
         }        
-        response = requests.post("http://127.0.0.1:8000/login", json=json_payload, timeout=5)        
+        base_url = get_base_url()
+        response = requests.post(f"{base_url}/login", json=json_payload, timeout=5)        
         if response.status_code != 200:
             return {"success": False, "error": f"Server Error: {response.text}"}
+        server_response = response.json()
         return {
             "success": True, 
-            "data": response.json(),
+            "data": {
+                "username": server_response.get("username"),
+                "display_name": server_response.get("display_name")
+            },
             "private_key_loaded": True,
             "id_priv_key": id_priv_key,
             "dh_priv_key": dh_priv_key,
@@ -173,7 +186,8 @@ def handle_gc_creation(group_name, creator_display_name, display_name_list):
         "members_display_names": display_name_list
     }
     try:
-        response = requests.post("http://127.0.0.1:8000/groups/create", json=payload)
+        base_url = get_base_url()
+        response = requests.post(f"{base_url}/groups/create", json=payload)
         if response.status_code == 200:
             return {"success": True, "data": response.json()}
         elif response.status_code == 404:
@@ -202,9 +216,16 @@ def handle_gc_creation(group_name, creator_display_name, display_name_list):
         return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
 
 # Fetches the user's group chats for the client to process
-def fetch_user_gcs(display_name):
+def fetch_user_gcs(display_name, username, id_priv_key):
     try:
-        response = requests.get(f"http://127.0.0.1:8000/users/{display_name}/groups", timeout=5)    
+        base_url = get_base_url()
+        # added a signature thing so the user can only fetch their own gcs (more secure)
+        signature = base64.b64encode(id_priv_key.sign(username.encode())).decode()
+        response = requests.get(
+            f"{base_url}/users/{display_name}/groups",
+            params={"requester": username, "signature": signature},
+            timeout=5
+        )    
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:
@@ -219,10 +240,11 @@ def fetch_user_gcs(display_name):
 # Used to fetch a single group chat for the purposes of dynamically adding to group chat
 def fetch_gc(group_id):
     try:
-        url = f"http://127.0.0.1:8000/groups/{group_id}"
+        base_url = get_base_url()
+        url = f"{base_url}/groups/{group_id}"
         response = requests.get(url)
         if response.status_code == 200:
-            return {"success": True, "result": response}
+            return {"success": True, "result": response.json()} #changed to keep pattern of .json( doesnt actually matter)
         else:
             return {"success": False, "result": response.status_code}
     except Exception as e:

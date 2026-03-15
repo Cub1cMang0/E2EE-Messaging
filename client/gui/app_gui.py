@@ -35,6 +35,12 @@ class Ui_main_window(object):
         self.add_group_button.setFont(font)
 
         self.verticalLayout.addWidget(self.add_group_button)
+        
+        self.refresh_gc_button = QPushButton(main_window)
+        self.refresh_gc_button.setObjectName(u"refresh_gc_button")
+        self.refresh_gc_button.setFont(font)
+
+        self.verticalLayout.addWidget(self.refresh_gc_button)
 
         self.gc_list = QListWidget(main_window)
         self.gc_list.setObjectName(u"gc_list")
@@ -91,6 +97,7 @@ class Ui_main_window(object):
     def retranslateUi(self, main_window):
         main_window.setWindowTitle(QCoreApplication.translate("main_window", u"E2EE Messaging", None))
         self.add_group_button.setText(QCoreApplication.translate("main_window", u"Add Group", None))
+        self.refresh_gc_button.setText(QCoreApplication.translate("main_window", u"Refresh Chats", None))
         self.send_button.setText(QCoreApplication.translate("main_window", u"Send", None))
     # retranslateUi
 

@@ -15,17 +15,6 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 app = FastAPI()
 SERVER_KEY_FILE = "server_dh_key.dat"
 
-class Message(BaseModel): # add stuff to this as needed
-    sender: str
-    recipient: str
-    content: str
-
-class ConnectToUser(BaseModel): # can add key exchange
-    username: str
-    display_name: str
-    id_pub_key: str
-    dh_pub_key: str
-
 class UserRegister(BaseModel):
     username: str
     display_name: str
@@ -50,7 +39,6 @@ def get_db():
 class ConnectionManager:
     def __init__(self):
         self.connections: Dict[str, WebSocket] = {}  # username -> websocket
-        self.active_chats: Dict[str, str] = {}  # username -> who theyre talking to
     
     async def connect_to_server(self, websocket: WebSocket, username: str):
         """connect a user to the server"""
@@ -58,88 +46,12 @@ class ConnectionManager:
         self.connections[username] = websocket # add key gen stuff here
         return True
     
-    async def connect_to_user(self, username: str, target_user: str): # add stuff to pass some kind of key to validate
-        """Connect a user to chat with another user (both must be online)"""
-        if target_user not in self.connections:
-            return {"success": False, "error": f"{target_user} is not online"}
-        
-        if username not in self.connections:
-            return {"success": False, "error": f"{username} is not online"}
-        
-        # set up the chat connection
-        self.active_chats[username] = target_user
-        
-        # Notify both users
-        connect_notification = { # add key exchange stuff
-            "type": "chat_connected",
-            "sender": "system",
-            "message": f"Connected to {target_user}",
-            "chat_partner": target_user
-        }
-        
-        partner_notification = {
-            "type": "chat_partner_connected",
-            "sender": "system", 
-            "message": f"{username} started a chat with you",
-            "chat_partner": username
-        }
-        
-        try:
-            await self.connections[username].send_text(json.dumps(connect_notification))
-            await self.connections[target_user].send_text(json.dumps(partner_notification))
-        except:
-            pass
-            
-        return {"success": True, "message": f"Connected to {target_user}"}
+    def disconnect_from_server(self, username: str):
+        """Remove user from connections"""
+        if username in self.connections:
+            del self.connections[username]
     
-    def disconnect_from_server(self, username: str): # add stuff to pass some kind of key to validate
-        if username not in self.connections:
-            return
-            
-        chat_partner = self.active_chats.get(username)
-        if chat_partner and chat_partner in self.connections:
-            disconnect_notification = {
-                "type": "chat_partner_disconnected",
-                "sender": "system",
-                "message": f"{username} disconnected from server"
-            }
-            try:
-                import asyncio
-                loop = asyncio.get_event_loop() 
-                loop.create_task(self.connections[chat_partner].send_text(json.dumps(disconnect_notification)))
-            except:
-                pass
-        
-        del self.connections[username]
-        if username in self.active_chats:
-            del self.active_chats[username]
-    
-    async def send_message(self, message: Message): # add stuff to pass some kind of key to validate sender
-        """Send a message from sender to recipient."""
-        # check if both users are online
-        # also need to check validate sender's identity, maybe make a separate parallel key between users and server
-        if message.recipient not in self.connections:
-            return {"success": False, "error": f"{message.recipient} is not online"}
-        
-        if message.sender not in self.connections:
-            return {"success": False, "error": f"{message.sender} is not online"}
-        
-        message_data = {
-            "type": "message",
-            "sender": message.sender,
-            "recipient": message.recipient,
-            "content": message.content
-        }
-        
-        # send to recipient
-        try:
-            await self.connections[message.recipient].send_text(json.dumps(message_data))
-            return {"success": True, "message": "sent"}
-        except:
-            return {"success": False, "error": "Failed to send message"}
-    
-
-    # send a raw message to a recipient
+    # send a raw message to a recipient (using this for all message sends now)
     async def send_raw(self, recipient: str, data: dict):
         if recipient not in self.connections:
             return {"success": False, "error": f"{recipient} is not online"}
@@ -211,7 +123,11 @@ async def register_user(user: UserRegister, db: Session = Depends(get_db)):
     )
     db.add(new_user)
     db.commit()
-    return {"message": f"User {user.username} has been registered"}
+    return {
+        "message": f"User {user.username} has been registered",
+        "username": user.username,
+        "display_name": user.display_name
+    }
 # Used to attempt to login a user
 @app.post("/login")
 def login_user(payload: UserLogin, db: Session = Depends(get_db)):
@@ -234,10 +150,15 @@ def login_user(payload: UserLogin, db: Session = Depends(get_db)):
             sender_dh_public=client_dh_public
         )
         plain_text = plaintext_bytes.decode('utf-8')
+        user = db.query(User).filter(User.username == payload.sender_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found in database")
         return {
             "status": "success",
             "message": "Login payload has been successfully decrypted",
-            "decrypted_data": plain_text
+            "decrypted_data": plain_text,
+            "username": user.username,
+            "display_name": user.display_name
         }
     except HTTPException:
         raise HTTPException(status_code=404, detail="Sender not found in database.")
@@ -313,7 +234,7 @@ async def create_group_chat(group_data: Group_Create, db: Session = Depends(get_
             )
             db.add(new_member)
         else:
-            print(f"Warning: User {username} not found, skipping.")
+            print(f"Warning: User {display_name} not found, skipping.")
     db.commit()
     return {
         "success": True, 
@@ -323,10 +244,24 @@ async def create_group_chat(group_data: Group_Create, db: Session = Depends(get_
 
 # Used to fetch the user's group chats that they are a part of during login
 @app.get("/users/{display_name}/groups")
-def get_user_gcs(display_name, db: Session = Depends(get_db)):
+def get_user_gcs(display_name: str, requester: str, signature: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.display_name == display_name).first()
-    if not user:
+    requester_user = db.query(User).filter(User.display_name == requester).first()
+    
+    if not user or not requester_user:
         raise HTTPException(status_code=404, detail="User does not exist")
+    
+    # verify identiy of requesting user
+
+    if requester_user.id != user.id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    try:
+        pub_key = ed25519.Ed25519PublicKey.from_public_bytes(bytes.fromhex(requester_user.id_pub_key))
+        pub_key.verify(base64.b64decode(signature), requester.encode())
+    except:
+        raise HTTPException(status_code=401, detail="Invalid signature")
+    
     user_group_chats = db.query(Group).join(Group_Member).filter(Group_Member.user_id == user.id).all()
     group_chats_data = [{"group_id": g.id, "name": g.chat_name} for g in user_group_chats]
     return {"success": True, "group_chats": group_chats_data}
@@ -348,6 +283,14 @@ def get_online_users():
     """Get list of users"""
     return {"users": list(manager.connections.keys())}
 
+@app.get("/groups/{group_id}/members")
+async def get_group_members(group_id: int, db: Session = Depends(get_db)):
+    """Get display names of all members in a group"""
+    members = db.query(User.display_name).join(Group_Member).filter(Group_Member.group_id == group_id).all()
+    if not members:
+        raise HTTPException(status_code=404, detail="Group not found")
+    return {"members": [m[0] for m in members]}
+
 # could include something specifying a new or returning user, where
 # new users pass along a public key and returning users pass along an encrypted
 # message using a key created from the server's public key (?)
@@ -361,12 +304,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             data = await websocket.receive_text()
             message_data = json.loads(data)
             
-            if message_data.get("type") == "connect_to_user":
-                result = await manager.connect_to_user(username, message_data["target_user"])
-                response = {"type": "connect_response", "data": result}
-                await websocket.send_text(json.dumps(response))
-                
-            elif message_data.get("type") == "message":
+            if message_data.get("type") == "message":
                 # message_data["payload"] is a dict like MessagePayload but base64-encoded
                 await manager.send_raw(message_data["recipient"], {
                     "type": "message",
