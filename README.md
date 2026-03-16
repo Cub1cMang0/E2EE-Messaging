@@ -44,13 +44,11 @@ On first run the server creates two files in the project root:
 In a separate terminal, from the `client/gui/` directory:
 
 ```bash
-cd client/gui
-
 # Local mode (talks to 127.0.0.1:8000)
-python main.py local
+python client/gui/main.py local
 
 # Server mode (talks to https://chat.yoshi.red)
-python main.py server
+python client/gui/main.py server
 ```
 
 ### Step 3 — Register and Log In
